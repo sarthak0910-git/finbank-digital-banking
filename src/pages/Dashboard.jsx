@@ -6,6 +6,7 @@ import AccountCard from '../components/dashboard/AccountCard';
 import TransactionItem from '../components/dashboard/TransactionItem';
 import SpendingChart from '../components/dashboard/SpendingChart';
 import QuickActions from '../components/dashboard/QuickActions';
+import FinancialOverview from '../components/dashboard/FinancialOverview';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ export default function Dashboard() {
           </div>
 
           <SpendingChart />
+          <FinancialOverview />
           <QuickActions />
         </div>
 
