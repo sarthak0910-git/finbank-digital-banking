@@ -1,125 +1,63 @@
-# Digital Banking Dashboard
+# Aurevia Bank — Digital Banking Coursework Project
 
-A single-page banking dashboard built with React for a B.Tech coursework submission. It simulates a
-digital bank — sign in, view accounts and balances, send money, manage cards, and track a mock
-investment portfolio — all running entirely in the browser with `localStorage` acting as the database.
-There is no real backend, no real money, and no real API calls.
+A React/Vite banking dashboard with a Node.js/Express API. This is a coursework demo only: it does not connect to a real bank, move real money, or provide production-grade financial services.
 
-## Features
+## Project structure
 
-- [x] Sign-in flow with hardcoded mock credentials, protected routes, and logout
-- [x] Dashboard: total balance, account cards, weekly spending chart, quick actions, recent transactions
-- [x] Accounts page with an "Add Account" form that persists to localStorage
-- [x] Payments page: send money form that actually deducts balance and logs a transaction
-- [x] Cards page with per-card freeze/unfreeze toggle
-- [x] Investments page with a portfolio performance chart, period selector, and holdings table
-- [x] Settings page: change password, notification toggles, logout
-- [x] Fully responsive layout (sidebar → bottom nav on mobile)
-- [x] Dark theme only, flat card design, no gradients/glassmorphism
+- `src/` — React frontend (Vite), served from the repository root.
+- `back-end/` — Express API, authentication, and sql.js database implementation.
+- The backend creates its local SQLite database at `back-end/data/aurevia.sqlite` by default. Database files and environment files are excluded from Git.
 
-## Tech Stack
+## Requirements
 
-| Tool | Why |
-|---|---|
-| **React 18 + Vite** | Fast dev server, component-based UI |
-| **Tailwind CSS** | Utility-first styling, easy to keep the dark theme consistent |
-| **React Router DOM v6** | Client-side routing + protected routes |
-| **Recharts** | Chart library for the spending and portfolio charts |
-| **Lucide React** | Icon set used throughout the UI |
-| **Context API** | Simple global auth state, no need for Redux at this scale |
-| **localStorage** | Acts as the "database" since there's no backend |
+- Node.js 20 or newer and npm
 
-## Folder Structure
+## Run locally
 
-```
-src/
-├── components/
-│   ├── layout/        Sidebar, Header, AppLayout, ProtectedRoute
-│   ├── dashboard/      Small dashboard pieces (AccountCard, TransactionItem, SpendingChart, QuickActions)
-│   └── ui/              Reusable primitives (Button, Modal, Input)
-├── pages/                One component per route (SignIn, Dashboard, Accounts, Payments, Cards, Investments, Settings)
-├── context/
-│   └── AuthContext.jsx   Login/logout state, exposes useAuth()
-├── data/
-│   └── mockData.js       Seed data for users, accounts, transactions, investments, payees
-├── utils/
-│   └── localStorage.js   get/set/seed helpers for the localStorage "database"
-├── App.jsx               Route definitions
-├── main.jsx               Entry point, seeds mock data on first load
-└── index.css              Tailwind entry + base styles
+Use two terminals from the repository root.
+
+### Backend
+
+```powershell
+cd back-end
+npm ci
+Copy-Item .env.example .env
 ```
 
-## Setup Instructions
+Set a private `JWT_SECRET` of at least 24 characters in `back-end/.env`. Do not commit `.env`.
 
-```bash
-git clone <this-repo-url>
-cd banking-dashboard
-npm install
+```powershell
+npm run seed
 npm run dev
 ```
 
-Open the local URL Vite prints (usually `http://localhost:5173`).
+The API listens on `http://localhost:4000`; health check: `http://localhost:4000/api/health`.
 
-## Mock Login Credentials
+### Frontend
 
-| ID | Password |
-|---|---|
-| `user1` | `password123` |
-| `user2` | `password123` |
-| `user3` | `password123` |
+In a second terminal from the repository root:
 
-More mock users can be added in `src/data/mockData.js` (`mockUsers` array).
+```powershell
+npm ci
+npm run dev
+```
 
-## How Auth & Persistence Work
+Open `http://localhost:5173`. The frontend defaults to `http://localhost:4000/api`; set `VITE_API_URL` in a local frontend `.env` only if a different API URL is needed.
 
-On first load, `main.jsx` calls `seedData()` (from `src/utils/localStorage.js`), which writes the
-mock users, accounts, transactions, investments, and payees into `localStorage` **only if they
-aren't already there** — so data survives refreshes but won't get overwritten on every load.
+## Demo credentials
 
-`AuthContext` checks/writes a `bd_current_user` key in localStorage. On successful sign-in, `{id,
-name, email, loggedIn: true}` is stored there. `ProtectedRoute` reads this on every protected route
-and redirects to `/` if the user isn't logged in. Logging out simply removes that key.
+After seeding, sign in with `user1` / `password123`. The seed script also creates `user2` and `user3` with the same demo password. Change demo credentials before any shared deployment.
 
-Because everything lives in `localStorage`, clearing site data or using a different browser resets
-the app back to its seeded mock state.
+## Current integration scope
 
-## Pages
+Registration and login use the backend API. Passwords are bcrypt-hashed, and successful authentication returns a JWT used by protected API requests. The rest of the dashboard is a simulated coursework interface; do not treat its balances, payees, investments, or payment actions as real financial data or services.
 
-- **Sign In (`/`)** — the only public route. Validates against mock users.
-- **Dashboard (`/dashboard`)** — total balance, account cards, weekly spending chart, quick action
-  buttons (placeholder modals), and recent transactions.
-- **Accounts (`/accounts`)** — lists all accounts; "Add Account" opens a form that appends a new
-  account to localStorage and re-renders the list.
-- **Payments (`/payments`)** — "Send Money" form deducts the amount from the first account's
-  balance and logs a new transaction; recent payees prefill the recipient field; payment history
-  table below shows past payments.
-- **Cards (`/cards`)** — each account rendered as a card UI with a freeze/unfreeze toggle (dims the
-  card when frozen) and a "Request New Virtual Card" button that shows a toast.
-- **Investments (`/investments`)** — total portfolio value, a Recharts line chart with a 1D/1W/1M/6M/1Y
-  period selector (only 1Y changes the data range), a holdings table, and a static "AI Insights" text block.
-- **Settings (`/settings`)** — change password (validated against and updates the mock user in
-  localStorage), notification toggles, a disabled dark-mode toggle (this app is dark-only), and logout.
+The backend exposes account, transaction, card, payment, settings, and investment endpoints. See `back-end/README.md` and `back-end/API_EXAMPLES.http` for API details.
 
-## Responsive Design
+## Validation
 
-The sidebar is fixed on desktop/tablet (`md:` breakpoint and up) and replaced by a bottom
-navigation bar on mobile. Grids of cards collapse from 3 columns → 1 column on small screens, and
-tables scroll horizontally on narrow viewports instead of breaking layout.
+```powershell
+npm run build
+```
 
-## Known Limitations
-
-- No real backend or database — all data lives in `localStorage` and resets if it's cleared.
-- No real authentication — credentials are hardcoded and password "hashing" doesn't exist.
-- Money transfers, card requests, and quick actions are simulated, not real transactions.
-- No pagination — all lists render in full.
-
-## Possible Future Improvements
-
-- Real backend (Node/Express or similar) with a proper database
-- Real authentication (JWT, sessions, or an auth provider)
-- Real bank/payment API integration (e.g. Plaid-style aggregation)
-- Persisted multi-device sync instead of per-browser localStorage
-
-## Running Locally with ngrok
-
-See [`ngrok-hosting.md`](./ngrok-hosting.md) in the repo root for step-by-step hosting instructions.
+Run backend checks from `back-end/` as appropriate. There is currently no dedicated backend test script.
